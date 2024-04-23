@@ -30,7 +30,11 @@ import com.conmigo.backend_migo_soft.login.payload.response.MessageResponse;
 import com.conmigo.backend_migo_soft.login.repository.RoleRepository;
 import com.conmigo.backend_migo_soft.login.repository.UserRepository;
 import com.conmigo.backend_migo_soft.login.security.jwt.JwtUtils;
+import com.conmigo.backend_migo_soft.login.security.services.ForgotPasswordService;
 import com.conmigo.backend_migo_soft.login.security.services.UserDetailsImpl;
+import java.util.Optional;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RestController
@@ -50,6 +54,9 @@ public class AuthController {
 
   @Autowired
   JwtUtils jwtUtils;
+  
+  @Autowired
+  ForgotPasswordService forgotPassService;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -131,4 +138,19 @@ public class AuthController {
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
+  
+    @PostMapping("/forgot-password")
+    public String forgotPass( @RequestParam String email){
+        String response = forgotPassService.forgotPass(email);
+
+        if(!response.startsWith("Invalid")){
+            response= "http://localhost:8080/reset-password?token=" + response;
+        }
+        return response;
+    }
+
+    @PutMapping("/reset-password")
+        public String resetPass(@RequestParam String token, @RequestParam String password){
+            return forgotPassService.resetPass(token,password);
+        }
 }
