@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users",
@@ -37,6 +38,10 @@ public class User {
              joinColumns = @JoinColumn(name = "user_id"),
              inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
+  
+  private String token;
+    @Column(columnDefinition = "TIMESTAMP")
+  private LocalDateTime tokenCreationDate;
 
   public User() {
   }
