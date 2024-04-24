@@ -150,7 +150,7 @@ public class AuthController {
         String response = forgotPassService.forgotPass(email);
 
         if(!response.startsWith("Invalid")){
-            response= "http://localhost:8080/reset-password?token=" + response;
+            response= "http://localhost:8080/api/auth/reset-password?token=" + response;
         }
         return response;
     }
