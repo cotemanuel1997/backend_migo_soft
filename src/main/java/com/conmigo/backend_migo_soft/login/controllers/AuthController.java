@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.conmigo.backend_migo_soft.login.models.ERole;
 import com.conmigo.backend_migo_soft.login.models.Role;
 import com.conmigo.backend_migo_soft.login.models.User;
+import com.conmigo.backend_migo_soft.login.payload.request.EmailRequest;
 import com.conmigo.backend_migo_soft.login.payload.request.LoginRequest;
 import com.conmigo.backend_migo_soft.login.payload.request.SignupRequest;
 import com.conmigo.backend_migo_soft.login.payload.response.JwtResponse;
@@ -30,11 +31,13 @@ import com.conmigo.backend_migo_soft.login.payload.response.MessageResponse;
 import com.conmigo.backend_migo_soft.login.repository.RoleRepository;
 import com.conmigo.backend_migo_soft.login.repository.UserRepository;
 import com.conmigo.backend_migo_soft.login.security.jwt.JwtUtils;
+import com.conmigo.backend_migo_soft.login.security.services.EmailService;
 import com.conmigo.backend_migo_soft.login.security.services.ForgotPasswordService;
 import com.conmigo.backend_migo_soft.login.security.services.UserDetailsImpl;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.thymeleaf.context.Context;
 
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RestController
@@ -57,6 +60,9 @@ public class AuthController {
   
   @Autowired
   ForgotPasswordService forgotPassService;
+  
+  @Autowired
+  EmailService emailService;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -153,4 +159,23 @@ public class AuthController {
         public String resetPass(@RequestParam String token, @RequestParam String password){
             return forgotPassService.resetPass(token,password);
         }
+        
+
+
+
+    @PostMapping("/send-email")
+    public String sendEmail(@RequestBody EmailRequest emailRequest) {
+        emailService.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getBody());
+        return "Email sent successfully!";
+    }
+    
+    @PostMapping("/send-html-email")
+    public String sendHtmlEmail(@RequestBody EmailRequest emailRequest) {
+        Context context = new Context();
+        context.setVariable("message", emailRequest.getBody());
+
+        emailService.sendEmailWithHtmlTemplate(emailRequest.getTo(), emailRequest.getSubject(), "email-template", context);
+        return "HTML email sent successfully!";
+    }
 }
+
