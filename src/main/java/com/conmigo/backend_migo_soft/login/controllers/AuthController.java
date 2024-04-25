@@ -151,7 +151,13 @@ public class AuthController {
 
         if(!response.startsWith("Invalid")){
             response= "http://localhost:8080/api/auth/reset-password?token=" + response;
+            Context context = new Context();
+            context.setVariable("message", response);
+
+            emailService.sendEmailWithHtmlTemplate(email, "Recuperar contraseña", "email-template", context);
+
         }
+        
         return response;
     }
 
