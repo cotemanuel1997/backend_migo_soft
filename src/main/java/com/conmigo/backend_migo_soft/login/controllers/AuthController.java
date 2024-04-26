@@ -36,6 +36,7 @@ import com.conmigo.backend_migo_soft.login.security.services.ForgotPasswordServi
 import com.conmigo.backend_migo_soft.login.security.services.UserDetailsImpl;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.context.Context;
 
@@ -145,26 +146,56 @@ public class AuthController {
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
   
-    @PostMapping("/forgot-password")
-    public String forgotPass( @RequestParam String email){
+    @GetMapping("/forgot-password")
+    public ResponseEntity<?> forgotPass( @RequestParam String email){
         String response = forgotPassService.forgotPass(email);
 
         if(!response.startsWith("Invalid")){
-            response= "http://localhost:8080/api/auth/reset-password?token=" + response;
             Context context = new Context();
             context.setVariable("message", response);
 
             emailService.sendEmailWithHtmlTemplate(email, "Recuperar contraseña", "email-template", context);
-
+            return ResponseEntity.ok(new MessageResponse(response));
         }
+
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Email inválido"));        
         
-        return response;
     }
+    
+    @GetMapping("/verify-token")
+        public ResponseEntity<?> verifyToken(@RequestParam String token){
+            String response = forgotPassService.verifyToken(token);
+            if(response == "Invalid token"){
+                return ResponseEntity
+                         .badRequest()
+                         .body(new MessageResponse("Token invalido"));                
+            }
+            if(response == "Token expired."){
+                 return ResponseEntity
+                         .badRequest()
+                         .body(new MessageResponse("Token expirado"));                                       
+            }
+            return ResponseEntity.ok(new MessageResponse("Token válido")); 
+           
+    }    
 
     @PutMapping("/reset-password")
-        public String resetPass(@RequestParam String token, @RequestParam String password){
-            return forgotPassService.resetPass(token,password);
-        }
+        public ResponseEntity<?> resetPass(@RequestParam String token, @RequestParam String password){
+            String response = forgotPassService.resetPass(token,password);
+            if(response == "Invalid token"){
+                return ResponseEntity
+                         .badRequest()
+                         .body(new MessageResponse("Token invalido"));                
+            }
+            if(response == "Token expired."){
+                 return ResponseEntity
+                         .badRequest()
+                         .body(new MessageResponse("Token expirado"));                                       
+            }
+            return ResponseEntity.ok(new MessageResponse("Contraseña actualizada")); 
+    }
         
 
 

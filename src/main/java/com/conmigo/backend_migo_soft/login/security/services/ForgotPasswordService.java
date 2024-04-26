@@ -2,6 +2,7 @@ package com.conmigo.backend_migo_soft.login.security.services;
 
 import com.conmigo.backend_migo_soft.login.models.User;
 import com.conmigo.backend_migo_soft.login.repository.UserRepository;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -34,6 +35,23 @@ public class ForgotPasswordService {
         user=repo.save(user);
         return user.getToken();
     }
+    
+    public String verifyToken(String token){
+    
+        Optional<User> userOptional= Optional.ofNullable(repo.findByToken(token));
+
+        if(!userOptional.isPresent()){
+            return "Invalid token";
+        }
+        LocalDateTime tokenCreationDate = userOptional.get().getTokenCreationDate();
+
+        if (isTokenExpired(tokenCreationDate)) {
+            return "Token expired.";
+        }
+        
+        return "Valid token";
+        
+    }
 
     public String resetPass(String token, String password){
         Optional<User> userOptional= Optional.ofNullable(repo.findByToken(token));
@@ -60,10 +78,14 @@ public class ForgotPasswordService {
     }
 
     private String generateToken() {
-        StringBuilder token = new StringBuilder();
-
-        return token.append(UUID.randomUUID().toString())
-                .append(UUID.randomUUID().toString()).toString();
+        String CHARACTERS = "0123456789";
+        int TOKEN_LENGTH = 6;
+        SecureRandom random = new SecureRandom();
+        StringBuilder token = new StringBuilder(TOKEN_LENGTH);
+        for (int i = 0; i < TOKEN_LENGTH; i++) {
+            token.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        return token.toString();
     }
 
     private boolean isTokenExpired(final LocalDateTime tokenCreationDate) {
