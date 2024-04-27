@@ -3,6 +3,6 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 FROM openjdk:17.0.1-jdk-slim
-COPY --from=build /target/backend_migo_soft-0.0.1-SNAPSHOT.jar demo.jar
+COPY --from=build /target/backend_migo_soft-0.0.1-SNAPSHOT.jar backend_migo_soft.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","backend_migo_soft.jar"]
