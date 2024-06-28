@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 //for Angular Client (withCredentials)
 
-//@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 
-@CrossOrigin(origins = "https://moonlit-hummingbird-c0e029.netlify.app", maxAge = 3600, allowCredentials="true")
+//@CrossOrigin(origins = "https://moonlit-hummingbird-c0e029.netlify.app", maxAge = 3600, allowCredentials="true")
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/test")
@@ -72,4 +74,13 @@ public class TestController {
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('PROFESSIONAL') or hasRole('ADMIN')") 
+    public ResponseEntity<Void> eliminarPieza(@PathVariable Long id) {
+        if (!piezaRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        piezaRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
